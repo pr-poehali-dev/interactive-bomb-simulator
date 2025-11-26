@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import Map from '@/components/Map';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -17,6 +18,7 @@ const Index = () => {
   const [bombType, setBombType] = useState('nuclear');
   const [bombYield, setBombYield] = useState([100]);
   const [simulationResults, setSimulationResults] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number} | null>(null);
 
   const calculateImpact = () => {
     const diameter = meteorSize[0];
@@ -292,14 +294,20 @@ const Index = () => {
                         <Icon name="MapPin" size={24} className="text-primary" />
                         <h3 className="text-lg font-semibold">Место удара</h3>
                       </div>
-                      <div className="aspect-video bg-background rounded-lg flex items-center justify-center border-2 border-border relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-destructive/5"></div>
-                        <div className="relative z-10 text-center space-y-2">
-                          <Icon name="MapPin" size={48} className="mx-auto text-destructive animate-pulse-glow" />
-                          <p className="text-sm text-muted-foreground">Интерактивная карта</p>
-                          <p className="text-xs text-muted-foreground">Выберите точку для симуляции удара</p>
-                        </div>
+                      <div className="aspect-video bg-background rounded-lg overflow-hidden">
+                        <Map 
+                          onLocationSelect={(lat, lng) => setSelectedLocation({lat, lng})}
+                          impactRadius={simulationResults?.devastationRadius ? parseFloat(simulationResults.devastationRadius) : undefined}
+                          type="meteor"
+                        />
                       </div>
+                      {selectedLocation && (
+                        <div className="mt-3 p-3 bg-background rounded-lg border border-border">
+                          <p className="text-xs text-muted-foreground">
+                            Координаты: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
+                          </p>
+                        </div>
+                      )}
                     </Card>
                   </TabsContent>
 
@@ -348,14 +356,23 @@ const Index = () => {
                         <Icon name="MapPin" size={24} className="text-destructive" />
                         <h3 className="text-lg font-semibold">Точка взрыва</h3>
                       </div>
-                      <div className="aspect-video bg-background rounded-lg flex items-center justify-center border-2 border-border relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-primary/5"></div>
-                        <div className="relative z-10 text-center space-y-2">
-                          <Icon name="Crosshair" size={48} className="mx-auto text-destructive animate-pulse-glow" />
-                          <p className="text-sm text-muted-foreground">Интерактивная карта</p>
-                          <p className="text-xs text-muted-foreground">Выберите точку для симуляции взрыва</p>
-                        </div>
+                      <div className="aspect-video bg-background rounded-lg overflow-hidden">
+                        <Map 
+                          onLocationSelect={(lat, lng) => setSelectedLocation({lat, lng})}
+                          impactRadius={simulationResults?.fireballRadius ? parseFloat(simulationResults.fireballRadius) : undefined}
+                          radiationRadius={simulationResults?.radiationRadius ? parseFloat(simulationResults.radiationRadius) : undefined}
+                          blastRadius={simulationResults?.blastRadius ? parseFloat(simulationResults.blastRadius) : undefined}
+                          thermalRadius={simulationResults?.thermalRadius ? parseFloat(simulationResults.thermalRadius) : undefined}
+                          type="bomb"
+                        />
                       </div>
+                      {selectedLocation && (
+                        <div className="mt-3 p-3 bg-background rounded-lg border border-border">
+                          <p className="text-xs text-muted-foreground">
+                            Координаты: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)}
+                          </p>
+                        </div>
+                      )}
                     </Card>
                   </TabsContent>
                 </Tabs>
